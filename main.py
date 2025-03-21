@@ -8,8 +8,6 @@ from io import BytesIO
 app = FastAPI()
 
 CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY")
-SESSION_ID = os.getenv("SESSION_ID")
-SESSION_SIGN = os.getenv("SESSION_SIGN")
 
 class ChartRequest(BaseModel):
     symbol: str
@@ -22,40 +20,46 @@ def read_root():
 @app.post("/get_chart_image")
 def get_chart_image(request: ChartRequest):
     headers = {
-        "Authorization": f"Bearer {CHART_IMG_API_KEY}",
+        "x-api-key": CHART_IMG_API_KEY,
         "Content-Type": "application/json"
     }
 
-    params = {
-    "symbol": request.symbol,
-    "interval": request.interval,
-    "studies": [
-        "PPS:Traditional,Auto,15",  # ✅ Pivot Points Standard (Support & Resistance Levels)
-        "BB:20,close,2",            # ✅ Bollinger Bands (Dynamic Price Zones)
-        "VSTOP:20,close,2"          # ✅ Volatility Stop (Dynamic Zones Like SNR)
-    ],
-    "theme": "dark",
-    "style": "candle",
-    "width": 1920,
-    "height": 1600,
-    "timezone": "Etc/UTC",
-    "format": "png",
-    "logo": "false"  # Remove logo for a cleaner look
-}
-
+    payload = {
+        "symbol": request.symbol,                   
+        "interval": request.interval,               
+        "theme": "dark",
+        "style": "candle",
+        "width": 1920,
+        "height": 1600,
+        "studies": [
+            {"name": "Pivot Points Standard"},
+            {"name": "Bollinger Bands"},
+            {"name": "Relative Strength Index"}
+        ],
+        "drawings": [
+            {
+                "name": "Rectangle",
+                "input": {"x1": "high", "y1": "high+5", "x2": "low", "y2": "low-5"},
+                "override": {"fillColor": "rgba(255, 0, 0, 0.2)", "borderColor": "rgba(255, 0, 0, 1)"}
+            },
+            {
+                "name": "Rectangle",
+                "input": {"x1": "low", "y1": "low-5", "x2": "high", "y2": "high+5"},
+                "override": {"fillColor": "rgba(0, 255, 0, 0.2)", "borderColor": "rgba(0, 255, 0, 1)"}
+            }
+        ]
+    }
 
     try:
-        response = requests.get(
-            "https://api.chart-img.com/v1/tradingview/advanced-chart",
+        response = requests.post(
+            "https://api.chart-img.com/v2/tradingview/advanced-chart",
             headers=headers,
-            params=params
+            json=payload
         )
 
-        print("Status:", response.status_code)
         if response.status_code == 200:
             return StreamingResponse(BytesIO(response.content), media_type="image/png")
         else:
-            print("Error:", response.text)
             return {"error": f"API Error {response.status_code}", "details": response.text}
 
     except Exception as e:
