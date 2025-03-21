@@ -32,7 +32,7 @@ def get_chart_image(request: ChartRequest):
         "height": 1080,  
         "format": "png",
         "zoomOut": 3,   # Adjust chart zoom level
-        "shiftLeft": 70,  # Move the chart slightly left
+        "shiftLeft": 75,  # Move the chart slightly left
         "override": {
             "mainPaneHeight": 800  # Increase main chart area size
         }
