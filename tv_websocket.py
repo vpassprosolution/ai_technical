@@ -20,19 +20,22 @@ def connect_tradingview(symbol="OANDA:XAUUSD"):
         "wss://widgetdata.tradingview.com/socket.io/websocket",
         on_message=partial(on_message, session_id=session_id, symbol=symbol),
         on_open=partial(on_open, session_id=session_id, symbol=symbol),
-        on_error=lambda ws, err, *args: print("WebSocket Error:", err),   # ✅ FIXED
-        on_close=lambda ws, *args: print("WebSocket Closed.")            # ✅ FIXED
+        on_error=lambda ws, err, *args: print("WebSocket Error:", err),
+        on_close=lambda ws, *args: print("WebSocket Closed.")
     )
 
     thread = threading.Thread(target=socket.run_forever)
     thread.start()
 
-    # Wait a few seconds to gather price
-    time.sleep(3)
+    # ✅ Wait for price or timeout after 7 seconds
+    timeout = 7
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        if symbol in REALTIME_PRICE:
+            break
+        time.sleep(0.3)
 
-    # Close connection after getting price
     socket.close()
-
     return REALTIME_PRICE.get(symbol, "Price not found")
 
 def on_open(ws, session_id, symbol):
