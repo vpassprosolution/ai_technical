@@ -32,7 +32,7 @@ def get_chart_image(request: ChartRequest):
         "width": 1920,
         "height": 1080,
         "format": "png",
-        "zoomIn": 3,
+        "zoomIn": 2,
         "override": {
             "showLegend": False,
             "showStudyLastValue": False
