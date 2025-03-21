@@ -1,8 +1,9 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 import requests
 from pydantic import BaseModel
-import uuid
+from fastapi.responses import StreamingResponse
+from io import BytesIO
 
 app = FastAPI()
 
@@ -42,9 +43,6 @@ def get_chart_image(request: ChartRequest):
     )
 
     if response.status_code == 200:
-        image_filename = f"chart_{uuid.uuid4().hex}.png"
-        with open(image_filename, "wb") as file:
-            file.write(response.content)
-        return {"chart_image": image_filename}
+        return StreamingResponse(BytesIO(response.content), media_type="image/png")
 
     return {"error": f"API Error: {response.status_code}", "details": response.text}
