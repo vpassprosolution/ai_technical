@@ -28,14 +28,28 @@ def get_chart_image(request: ChartRequest):
         "Content-Type": "application/json"
     }
 
+    # Define the chart indicators you want to add (default ones like Moving Averages, RSI)
+    indicators = [
+        {
+            "id": "sma",  # Simple Moving Average
+            "length": 14,  # 14 periods
+            "color": "blue"
+        },
+        {
+            "id": "rsi",  # Relative Strength Index
+            "length": 14,  # 14 periods
+            "color": "green"
+        }
+    ]
+
     payload = {
         "symbol": request.symbol,
         "interval": request.interval,
         "width": 1920,  # Max resolution
         "height": 1600,
-        "layout": "vessa pro",  # Ensure this is exactly your TradingView layout name
-        "loadIndicators": True,  # Force Chart-IMG to load indicators from the layout
-        "useIndicatorsFromLayout": True,  # Explicitly load indicators from the TradingView layout
+        "layout": "vessa pro",  # Use your TradingView layout (if desired)
+        "loadIndicators": True,  # Load the default indicators
+        "indicators": indicators  # Add the custom indicators like Moving Averages and RSI
     }
 
     try:
@@ -52,9 +66,3 @@ def get_chart_image(request: ChartRequest):
 
     except requests.exceptions.RequestException as e:
         return {"error": "Request failed", "details": str(e)}
-
-
-# ✅ Required for Railway Deployment
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
