@@ -35,7 +35,7 @@ def get_chart_image(request: ChartRequest):
         "height": 1080, # Not square, cinematic
         "theme": "dark",
         "style": "candle",
-        "zoomOut": 3,  # Zoom out slightly for better visibility
+        "zoomOut": 1,  # Zoom out slightly for better visibility
         "studies": [
             {"name": "Ichimoku Cloud"},  # Includes buy/sell zones
         ]
