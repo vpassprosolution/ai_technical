@@ -2,15 +2,14 @@ import os
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse
 import requests
 from io import BytesIO
 
 app = FastAPI()
 
 CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY")
-
-# Shared layout ID from TradingView
-LAYOUT_ID = "815anN0d"
+LAYOUT_ID = "815anN0d"  # Your shared layout ID
 
 class ChartRequest(BaseModel):
     symbol: str
@@ -18,8 +17,7 @@ class ChartRequest(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "AI Technical Chart Generator with Shared TradingView Layout"}
-
+    return {"message": "AI Layout Chart Generator is running ✅"}
 
 @app.post("/get_chart_image")
 def get_chart_image(request: ChartRequest):
@@ -29,8 +27,8 @@ def get_chart_image(request: ChartRequest):
     }
 
     payload = {
-        "symbol": request.symbol,           # e.g. BINANCE:BTCUSDT
-        "interval": request.interval,       # e.g. 1h, 4h, 1D
+        "symbol": request.symbol,
+        "interval": request.interval,
         "width": 1920,
         "height": 1080,
         "format": "png"
@@ -41,14 +39,18 @@ def get_chart_image(request: ChartRequest):
             f"https://api.chart-img.com/v2/tradingview/layout-chart/{LAYOUT_ID}",
             headers=headers,
             json=payload,
-            timeout=60  # recommended by Chart-IMG
+            timeout=60  # recommended
         )
 
-        print("Response Code:", response.status_code)
-        if response.status_code == 200:
+        print("Status Code:", response.status_code)
+        print("Response Headers:", response.headers)
+
+        if response.status_code == 200 and "image" in response.headers["Content-Type"]:
             return StreamingResponse(BytesIO(response.content), media_type="image/png")
         else:
-            return {"error": f"API Error {response.status_code}", "details": response.text}
+            print("❌ Non-image response received")
+            return JSONResponse(content={"error": "API did not return image", "details": response.text}, status_code=422)
 
     except Exception as e:
-        return {"error": "Request failed", "details": str(e)}
+        print("❌ Request Failed:", str(e))
+        return JSONResponse(content={"error": "Request crashed", "details": str(e)}, status_code=500)
