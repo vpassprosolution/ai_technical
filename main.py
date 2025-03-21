@@ -43,6 +43,13 @@ def get_chart_image(request: ChartRequest):
     )
 
     if response.status_code == 200:
+        # Return the image directly as a streaming response
         return StreamingResponse(BytesIO(response.content), media_type="image/png")
 
     return {"error": f"API Error: {response.status_code}", "details": response.text}
+
+
+# 👇 ADD THIS IF MISSING
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
