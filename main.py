@@ -106,8 +106,8 @@ def add_logo_to_chart(chart_image):
     logo_height = int((logo_width / logo.width) * logo.height)
     logo = logo.resize((logo_width, logo_height), Image.LANCZOS)
 
-    x_position = (chart_image.width - logo_width) // 1
-    y_position = chart_image.height - logo_height - 10
+    x_position = (chart_image.width - logo_width) // 2
+    y_position = chart_image.height - logo_height - 5
 
     chart_image.paste(logo, (x_position, y_position), logo)
     return chart_image

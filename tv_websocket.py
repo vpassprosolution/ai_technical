@@ -4,6 +4,7 @@ import websocket
 import json
 import threading
 import time
+from functools import partial
 
 REALTIME_PRICE = {}
 
@@ -16,8 +17,8 @@ def connect_tradingview(symbol="OANDA:XAUUSD"):
     session_id = _create_session_id()
     socket = websocket.WebSocketApp(
         "wss://widgetdata.tradingview.com/socket.io/websocket",
-        on_message=lambda ws, msg: on_message(ws, msg, session_id, symbol),
-        on_open=lambda ws: on_open(ws, session_id, symbol),
+        on_message=partial(on_message, session_id=session_id, symbol=symbol),
+        on_open=partial(on_open, session_id=session_id, symbol=symbol),
         on_error=lambda ws, err: print("WebSocket Error:", err),
         on_close=lambda ws: print("WebSocket Closed.")
     )
@@ -37,22 +38,16 @@ def on_open(ws, session_id, symbol):
     print(f"WebSocket connected for {symbol}")
     ws.send(json.dumps({"m": "set_auth_token", "p": ""}))
     ws.send(json.dumps({"m": "chart_create_session", "p": [session_id, ""]}))
-    ws.send(json.dumps({
-        "m": "resolve_symbol",
-        "p": [session_id, "s1", symbol]
-    }))
-    ws.send(json.dumps({
-        "m": "create_series",
-        "p": [session_id, "s1", "s1", "s1", 1, 300]
-    }))
+    ws.send(json.dumps({"m": "resolve_symbol", "p": [session_id, "s1", symbol]}))
+    ws.send(json.dumps({"m": "create_series", "p": [session_id, "s1", "s1", "s1", 1, 300]}))
 
 def on_message(ws, message, session_id, symbol):
     try:
-        data = json.loads(message)
-        if "s1" in message and "price" in message:
-            for update in data.get("p", [{}]):
-                price = update.get("v", {}).get("lp")  # last price
-                if price:
+        if "lp" in message:
+            data = json.loads(message)
+            for item in data.get("p", []):
+                if "v" in item and "lp" in item["v"]:
+                    price = item["v"]["lp"]
                     REALTIME_PRICE[symbol] = round(price, 2)
                     print(f"🔁 {symbol} Live Price: {REALTIME_PRICE[symbol]}")
     except Exception as e:
