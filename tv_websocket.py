@@ -15,12 +15,13 @@ def _create_session_id():
 
 def connect_tradingview(symbol="OANDA:XAUUSD"):
     session_id = _create_session_id()
+
     socket = websocket.WebSocketApp(
         "wss://widgetdata.tradingview.com/socket.io/websocket",
         on_message=partial(on_message, session_id=session_id, symbol=symbol),
         on_open=partial(on_open, session_id=session_id, symbol=symbol),
-        on_error=lambda ws, err: print("WebSocket Error:", err),
-        on_close=lambda ws: print("WebSocket Closed.")
+        on_error=lambda ws, err, *args: print("WebSocket Error:", err),   # ✅ FIXED
+        on_close=lambda ws, *args: print("WebSocket Closed.")            # ✅ FIXED
     )
 
     thread = threading.Thread(target=socket.run_forever)
