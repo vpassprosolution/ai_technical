@@ -31,8 +31,9 @@ def get_chart_image(request: ChartRequest):
     payload = {
         "symbol": request.symbol,
         "interval": request.interval,
-        "width": 800,
-        "height": 600
+        "width": 1280,  # Higher resolution for Pro
+        "height": 960,
+        "layout": "vessa pro"  # ✅ Loads your saved TradingView layout with indicators
     }
 
     response = requests.post(
@@ -46,7 +47,7 @@ def get_chart_image(request: ChartRequest):
 
     return {"error": f"API Error: {response.status_code}", "details": response.text}
 
-# ✅ IMPORTANT for Railway
+# ✅ Required for Railway Deployment
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
