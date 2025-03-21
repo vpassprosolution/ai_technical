@@ -31,24 +31,27 @@ def get_chart_image(request: ChartRequest):
         "style": "candle",
         "width": 1920,
         "height": 1080,
-        "drawings": [
+        "timezone": "Etc/UTC",
+        "studies": [
             {
-                "name": "Fib Retracement",
-                "input": {
-                    "startDatetime": "2022-12-30T05:00:00.000Z",
-                    "startPrice": 16333,
-                    "endDatetime": "2023-02-02T05:00:00.000Z",
-                    "endPrice": 24255
-                },
+                "name": "Pivot Points Standard",  # ✅ Auto support & resistance zones
                 "override": {
-                    "extendLines": True,
-                    "level7": {
-                        "color": "rgb(255,255,255)"
-                    }
-                },
-                "zOrder": "top"
+                    "PP.linewidth": 2,  
+                    "PP.color": "rgb(255,215,0)"  # Yellow lines for zones
+                }
+            },
+            {
+                "name": "Donchian Channels",  # ✅ Supply & demand zones
+                "override": {
+                    "DONCH.color": "rgb(0,255,255)",  # Cyan for buy/sell zones
+                    "DONCH.linewidth": 2
+                }
             }
-        ]
+        ],
+        "override": {
+            "showStudyLastValue": True,  # ✅ Show last values on chart
+            "showLegend": True  # ✅ Show indicator names
+        }
     }
 
     try:
@@ -57,6 +60,9 @@ def get_chart_image(request: ChartRequest):
             headers=headers,
             json=payload
         )
+
+        print("API Response Code:", response.status_code)
+        print("API Response Body:", response.text)
 
         if response.status_code == 200:
             return StreamingResponse(BytesIO(response.content), media_type="image/png")
