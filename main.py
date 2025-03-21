@@ -30,22 +30,24 @@ def get_chart_image(request: ChartRequest):
         "theme": "dark",
         "style": "candle",
         "width": 1920,
-        "height": 1600,
+        "height": 1080,
+        "range": {
+            "from": "2023-01-20T00:00:00.000Z",
+            "to": "2023-02-12T00:00:00.000Z"
+        },
         "studies": [
             {"name": "Pivot Points Standard"},
-            {"name": "Bollinger Bands"},
-            {"name": "Relative Strength Index"}
+            {"name": "Bollinger Bands"}
         ],
         "drawings": [
             {
                 "name": "Rectangle",
-                "input": {"x1": "high", "y1": "high+5", "x2": "low", "y2": "low-5"},
-                "override": {"fillColor": "rgba(255, 0, 0, 0.2)", "borderColor": "rgba(255, 0, 0, 1)"}
-            },
-            {
-                "name": "Rectangle",
-                "input": {"x1": "low", "y1": "low-5", "x2": "high", "y2": "high+5"},
-                "override": {"fillColor": "rgba(0, 255, 0, 0.2)", "borderColor": "rgba(0, 255, 0, 1)"}
+                "input": {
+                    "startDatetime": "2023-02-09T00:00:00.000Z",
+                    "entryPrice": 22400,
+                    "targetPrice": 24000,
+                    "stopPrice": 22100
+                }
             }
         ]
     }
