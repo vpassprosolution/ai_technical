@@ -23,18 +23,24 @@ def read_root():
 def get_chart_image(request: ChartRequest):
     headers = {
         "x-api-key": CHART_IMG_API_KEY,
-        "tradingview-session-id": SESSION_ID,  # Make sure this is correct
-        "tradingview-session-id-sign": SESSION_SIGN,  # Make sure this is correct
         "Content-Type": "application/json"
     }
 
     payload = {
         "symbol": request.symbol,
         "interval": request.interval,
-        "width": 1920,  # Max resolution for Pro
+        "width": 1920,
         "height": 1600,
-        "layout": "vessa pro",  # Your saved TradingView layout with indicators
-        "loadIndicators": True  # Ensures indicators are loaded with the layout
+        "indicators": [
+            {
+                "id": "rsi",
+                "length": 14
+            },
+            {
+                "id": "sma",
+                "length": 20
+            }
+        ]
     }
 
     try:
@@ -44,7 +50,6 @@ def get_chart_image(request: ChartRequest):
             json=payload
         )
 
-        # Debugging logs: Check if the response is valid
         print("Response Status Code:", response.status_code)
         print("Response Body:", response.text)
 
