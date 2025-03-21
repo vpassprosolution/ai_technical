@@ -29,15 +29,20 @@ def get_chart_image(request: ChartRequest):
     params = {
     "symbol": request.symbol,
     "interval": request.interval,
-    "studies": ["RSI:14,close", "MA:9,close"],
+    "studies": [
+        "PPS:Traditional,Auto,15",  # ✅ Pivot Points Standard (Support & Resistance Levels)
+        "BB:20,close,2",            # ✅ Bollinger Bands (Dynamic Price Zones)
+        "VSTOP:20,close,2"          # ✅ Volatility Stop (Dynamic Zones Like SNR)
+    ],
     "theme": "dark",
     "style": "candle",
     "width": 1920,
     "height": 1600,
     "timezone": "Etc/UTC",
     "format": "png",
-    "logo": "true"  # ✅ must be a string, not a boolean
+    "logo": "false"  # Remove logo for a cleaner look
 }
+
 
     try:
         response = requests.get(
