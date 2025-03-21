@@ -30,9 +30,9 @@ def get_chart_image(request: ChartRequest):
         "symbol": request.symbol,
         "interval": request.interval,
         "width": 1920,
-        "height": 1440,
+        "height": 1080,
         "format": "png",
-        "zoomIn": 4,
+        "zoomIn": 3,
         "override": {
             "showLegend": False,
             "showStudyLastValue": False
