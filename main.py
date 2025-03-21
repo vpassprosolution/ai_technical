@@ -41,8 +41,10 @@ CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY")
 LAYOUT_ID = "815anN0d"
 LOGO_PATH = "White-Logo-And-Font.png"
 
+# ✅ FIXED HERE
 class ChartRequest(BaseModel):
     symbol: str
+    interval: str  # ✅ You missed this before – now added
 
 @app.get("/")
 def read_root():
@@ -104,19 +106,20 @@ def add_logo_to_chart(chart_image):
     logo = Image.open(LOGO_PATH).convert("RGBA")
 
     # Resize logo to be larger
-    logo_width = chart_image.width // 4  # Bigger than before
+    logo_width = chart_image.width // 4
     logo_height = int((logo_width / logo.width) * logo.height)
     logo = logo.resize((logo_width, logo_height), Image.LANCZOS)
 
     # Position: Center-bottom
     x_position = (chart_image.width - logo_width) // 2  
-    y_position = chart_image.height - logo_height - 40  # Lower position, but still above chart edge
+    y_position = chart_image.height - logo_height - 20
 
     # Paste logo onto chart
     chart_image.paste(logo, (x_position, y_position), logo)
 
     return chart_image
 
+# Optional test mode
 if __name__ == "__main__":
     result = generate_analysis("XAUUSD", "M15")
     print(result)
