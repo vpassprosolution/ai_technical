@@ -23,29 +23,34 @@ def read_root():
 def get_chart_image(request: ChartRequest):
     headers = {
         "x-api-key": CHART_IMG_API_KEY,
-        "tradingview-session-id": SESSION_ID,
-        "tradingview-session-id-sign": SESSION_SIGN,
+        "tradingview-session-id": SESSION_ID,  # Make sure this is correct
+        "tradingview-session-id-sign": SESSION_SIGN,  # Make sure this is correct
         "Content-Type": "application/json"
     }
 
     payload = {
         "symbol": request.symbol,
         "interval": request.interval,
-        "width": 1280,  # Higher resolution for Pro
-        "height": 960,
-        "layout": "vessa pro"  # ✅ Loads your saved TradingView layout with indicators
+        "width": 1920,  # Higher resolution for Pro
+        "height": 1600,
+        "layout": "vessa pro",  # Your saved TradingView layout with indicators
+        "loadIndicators": True  # Ensures indicators are loaded with the layout
     }
 
-    response = requests.post(
-        "https://api.chart-img.com/v2/tradingview/advanced-chart",
-        headers=headers,
-        json=payload
-    )
+    try:
+        response = requests.post(
+            "https://api.chart-img.com/v2/tradingview/advanced-chart",
+            headers=headers,
+            json=payload
+        )
 
-    if response.status_code == 200:
-        return StreamingResponse(BytesIO(response.content), media_type="image/png")
+        if response.status_code == 200:
+            return StreamingResponse(BytesIO(response.content), media_type="image/png")
+        else:
+            return {"error": f"API Error: {response.status_code}", "details": response.text}
 
-    return {"error": f"API Error: {response.status_code}", "details": response.text}
+    except requests.exceptions.RequestException as e:
+        return {"error": "Request failed", "details": str(e)}
 
 # ✅ Required for Railway Deployment
 if __name__ == "__main__":
