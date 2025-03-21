@@ -22,43 +22,36 @@ def read_root():
 @app.post("/get_chart_image")
 def get_chart_image(request: ChartRequest):
     headers = {
-        "x-api-key": CHART_IMG_API_KEY,
+        "Authorization": f"Bearer {CHART_IMG_API_KEY}",
         "Content-Type": "application/json"
     }
 
-    payload = {
-        "symbol": request.symbol,
-        "interval": request.interval,
+    params = {
+        "symbol": request.symbol,                   # e.g., BINANCE:BTCUSDT or OANDA:XAUUSD
+        "interval": request.interval,               # e.g., 5m, 1h, 1D
+        "studies": ["RSI:14,close", "MA:9,close"],   # Built-in indicators (Relative Strength Index + Moving Average)
+        "theme": "dark",
+        "style": "candle",
         "width": 1920,
         "height": 1600,
-        "indicators": [
-            {
-                "id": "rsi",
-                "length": 14
-            },
-            {
-                "id": "sma",
-                "length": 20
-            }
-        ]
+        "timezone": "Etc/UTC",
+        "format": "png",
+        "logo": True
     }
 
     try:
-        response = requests.post(
-            "https://api.chart-img.com/v2/tradingview/advanced-chart",
+        response = requests.get(
+            "https://api.chart-img.com/v1/tradingview/advanced-chart",
             headers=headers,
-            json=payload
+            params=params
         )
 
-        print("Response Status Code:", response.status_code)
-        print("Response Body:", response.text)
-
+        print("Status:", response.status_code)
         if response.status_code == 200:
             return StreamingResponse(BytesIO(response.content), media_type="image/png")
         else:
-            print(f"Error Response: {response.text}")
-            return {"error": f"API Error: {response.status_code}", "details": response.text}
+            print("Error:", response.text)
+            return {"error": f"API Error {response.status_code}", "details": response.text}
 
-    except requests.exceptions.RequestException as e:
-        print("Request failed:", e)
+    except Exception as e:
         return {"error": "Request failed", "details": str(e)}
