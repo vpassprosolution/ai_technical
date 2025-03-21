@@ -1,11 +1,12 @@
 import os
 from fastapi import FastAPI
 from pydantic import BaseModel
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse
 import requests
 from io import BytesIO
 from PIL import Image
 import random
+import base64
 
 app = FastAPI()
 
@@ -83,11 +84,11 @@ def get_chart_image(request: ChartRequest):
 
         analysis_text = generate_dramatic_zone_analysis(request.symbol, request.interval)
 
-        return StreamingResponse(
-            img_io,
-            media_type="image/png",
-            headers={"Analysis-Text": analysis_text}
-        )
+        img_base64 = base64.b64encode(img_io.getvalue()).decode("utf-8")
+        return JSONResponse(content={
+            "caption": analysis_text,
+            "image_base64": img_base64
+        })
 
     except Exception as e:
         return {"error": "Request crashed", "details": str(e)}
