@@ -10,12 +10,14 @@ app = FastAPI()
 
 CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY")
 
-# Path to your logo (Ensure this file exists in the same directory)
+# Your TradingView Shared Layout ID (Make sure it's correct)
+LAYOUT_ID = "815anN0d"  # ✅ Your TradingView Layout
+
+# Path to your logo
 LOGO_PATH = "White-Logo-And-Font.png"
 
 class ChartRequest(BaseModel):
     symbol: str
-    interval: str
 
 @app.get("/")
 def read_root():
@@ -29,21 +31,15 @@ def get_chart_image(request: ChartRequest):
     }
 
     payload = {
-        "symbol": request.symbol,
-        "interval": request.interval,
-        "width": 1920,  # Wide HD format
-        "height": 1080, # Not square, cinematic
-        "theme": "dark",
-        "style": "candle",
-        "zoomOut": 3,  # Zoom out slightly for better visibility
-        "studies": [
-            {"name": "Ichimoku Cloud"},  # Includes buy/sell zones
-        ]
+        "symbol": request.symbol,  # ✅ Keep your requested symbol
+        "width": 1920,  # ✅ HD Wide Format
+        "height": 1080, # ✅ Not square, cinematic
+        "format": "png"
     }
 
     try:
         response = requests.post(
-            "https://api.chart-img.com/v2/tradingview/advanced-chart",
+            f"https://api.chart-img.com/v2/tradingview/layout-chart/{LAYOUT_ID}",
             headers=headers,
             json=payload
         )
@@ -62,24 +58,22 @@ def get_chart_image(request: ChartRequest):
         return {"error": "Request failed", "details": str(e)}
 
 def add_logo_to_chart(chart_image):
-    """ Adds the VessaPro logo to the bottom-center of the chart """
-    try:
-        # Load the logo
-        logo = Image.open(LOGO_PATH).convert("RGBA")
+    """ Adds the VessaPro watermark to the bottom-center of the chart """
+    if not os.path.exists(LOGO_PATH):
+        return chart_image  # If logo is missing, return original chart
 
-        # Resize logo to fit well (adjust as needed)
-        logo_width = chart_image.width // 5
-        logo_height = int((logo_width / logo.width) * logo.height)
-        logo = logo.resize((logo_width, logo_height), Image.LANCZOS)  # ✅ FIXED (Replaced ANTIALIAS)
+    logo = Image.open(LOGO_PATH).convert("RGBA")
 
-        # Position: Bottom-center
-        x_position = (chart_image.width - logo_width) // 2
-        y_position = chart_image.height - logo_height - 20  # 20px padding from bottom
+    # Resize logo to fit well (adjust as needed)
+    logo_width = chart_image.width // 5
+    logo_height = int((logo_width / logo.width) * logo.height)
+    logo = logo.resize((logo_width, logo_height), Image.LANCZOS)
 
-        # Paste logo onto chart
-        chart_image.paste(logo, (x_position, y_position), logo)
+    # Position: Bottom-center
+    x_position = (chart_image.width - logo_width) // 2
+    y_position = chart_image.height - logo_height - 20  # 20px padding from bottom
 
-        return chart_image
-    except Exception as e:
-        print(f"⚠️ Error adding logo: {e}")
-        return chart_image  # Return original if error occurs
+    # Paste logo onto chart
+    chart_image.paste(logo, (x_position, y_position), logo)
+
+    return chart_image
