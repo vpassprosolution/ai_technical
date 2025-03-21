@@ -4,13 +4,13 @@ from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 import requests
 from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 
 app = FastAPI()
 
 CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY")
 
-# Path to your logo
+# Path to your logo (Ensure this file exists in the same directory)
 LOGO_PATH = "White-Logo-And-Font.png"
 
 class ChartRequest(BaseModel):
@@ -35,7 +35,7 @@ def get_chart_image(request: ChartRequest):
         "height": 1080, # Not square, cinematic
         "theme": "dark",
         "style": "candle",
-        "zoomOut": 1,  # Zoom out slightly for better visibility
+        "zoomOut": 3,  # Zoom out slightly for better visibility
         "studies": [
             {"name": "Ichimoku Cloud"},  # Includes buy/sell zones
         ]
@@ -63,18 +63,23 @@ def get_chart_image(request: ChartRequest):
 
 def add_logo_to_chart(chart_image):
     """ Adds the VessaPro logo to the bottom-center of the chart """
-    logo = Image.open(LOGO_PATH).convert("RGBA")
+    try:
+        # Load the logo
+        logo = Image.open(LOGO_PATH).convert("RGBA")
 
-    # Resize logo to fit well (adjust as needed)
-    logo_width = chart_image.width // 5
-    logo_height = int((logo_width / logo.width) * logo.height)
-    logo = logo.resize((logo_width, logo_height), Image.ANTIALIAS)
+        # Resize logo to fit well (adjust as needed)
+        logo_width = chart_image.width // 5
+        logo_height = int((logo_width / logo.width) * logo.height)
+        logo = logo.resize((logo_width, logo_height), Image.LANCZOS)  # ✅ FIXED (Replaced ANTIALIAS)
 
-    # Position: Bottom-center
-    x_position = (chart_image.width - logo_width) // 2
-    y_position = chart_image.height - logo_height - 20  # 20px padding from bottom
+        # Position: Bottom-center
+        x_position = (chart_image.width - logo_width) // 2
+        y_position = chart_image.height - logo_height - 20  # 20px padding from bottom
 
-    # Paste logo onto chart
-    chart_image.paste(logo, (x_position, y_position), logo)
+        # Paste logo onto chart
+        chart_image.paste(logo, (x_position, y_position), logo)
 
-    return chart_image
+        return chart_image
+    except Exception as e:
+        print(f"⚠️ Error adding logo: {e}")
+        return chart_image  # Return original if error occurs
