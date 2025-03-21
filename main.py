@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 import requests
 from io import BytesIO
 from PIL import Image
-from tv_websocket import connect_tradingview
+import random
 
 app = FastAPI()
 
@@ -17,37 +17,33 @@ class ChartRequest(BaseModel):
     symbol: str
     interval: str
 
-def generate_analysis(symbol: str, interval: str):
-    # Determine exchange prefix
-    if ":" in symbol:
-        full_symbol = symbol  # already prefixed
-    elif "USD" in symbol:
-        full_symbol = f"OANDA:{symbol}"
-    else:
-        full_symbol = f"BINANCE:{symbol}"
-
-    # Get live price
-    live_price = connect_tradingview(full_symbol)
-    print(f"Live Price for {full_symbol}: {live_price}")
-
-    if isinstance(live_price, str):
-        return "Price not available at the moment."
-
-    support = round(live_price * 0.997, 2)
-    resistance = round(live_price * 1.0015, 2)
-
-    trend = "Bullish" if support < live_price < resistance else "Bearish"
+def generate_dramatic_zone_analysis(symbol: str, interval: str):
+    trend = random.choice(["Bullish", "Bearish"])
     emoji = "💹" if trend == "Bullish" else "📉"
 
-    message = (
+    zone_lines = [
+        "A key zone is lighting up on the chart...",
+        "The battle between buyers and sellers is clearly drawn in the zones.",
+        "Vessa highlights an area of interest where momentum is shifting.",
+        "Watch the zones closely — they’re whispering opportunity.",
+        "Price is hovering around a sensitive area. Stay sharp."
+    ]
+
+    guidance_lines = [
+        "Let the chart guide your timing. Read the zones, control your entry. 🎯",
+        "Focus on market structure, not just price. The zones don’t lie.",
+        "It’s not about prediction — it’s about preparation. Trust the levels.",
+        "The moment is near. Respect the zone. React with precision. ⚔️",
+        "Stay patient. The best trades come from the clearest zones. 🧘‍♂️"
+    ]
+
+    body = f"{random.choice(zone_lines)}\n\n{random.choice(guidance_lines)}"
+
+    return (
         f"{symbol} – Timeframe {interval.upper()}\n\n"
-        f"{trend} Trend {emoji}\n\n"
-        f"Vessa sees strong {'buying' if trend == 'Bullish' else 'selling'} opportunities.\n"
-        f"A key support level was spotted near ${support}\n"
-        f"and a resistance area around ${resistance}.\n"
-        f"Check nearby zones for the best entry points to maximize your gains."
+        f"{trend} Outlook {emoji}\n\n"
+        f"{body}"
     )
-    return message
 
 @app.get("/")
 def read_root():
@@ -85,7 +81,7 @@ def get_chart_image(request: ChartRequest):
         final_image.save(img_io, format="PNG")
         img_io.seek(0)
 
-        analysis_text = generate_analysis(request.symbol, request.interval)
+        analysis_text = generate_dramatic_zone_analysis(request.symbol, request.interval)
 
         return StreamingResponse(
             img_io,
@@ -114,5 +110,5 @@ def add_logo_to_chart(chart_image):
 
 # Optional test
 if __name__ == "__main__":
-    result = generate_analysis("XAUUSD", "M15")
+    result = generate_dramatic_zone_analysis("XAUUSD", "M15")
     print(result)
