@@ -31,19 +31,22 @@ def get_chart_image(request: ChartRequest):
         "style": "candle",
         "width": 1920,
         "height": 1080,
-        "range": {
-            "from": "2023-01-20T00:00:00.000Z",
-            "to": "2023-02-12T00:00:00.000Z"
-        },
         "drawings": [
             {
-                "name": "Long Position",
+                "name": "Fib Retracement",
                 "input": {
-                    "startDatetime": "2023-02-09T00:00:00.000Z",
-                    "entryPrice": 22400,
-                    "targetPrice": 24000,
-                    "stopPrice": 22100
-                }
+                    "startDatetime": "2022-12-30T05:00:00.000Z",
+                    "startPrice": 16333,
+                    "endDatetime": "2023-02-02T05:00:00.000Z",
+                    "endPrice": 24255
+                },
+                "override": {
+                    "extendLines": True,
+                    "level7": {
+                        "color": "rgb(255,255,255)"
+                    }
+                },
+                "zOrder": "top"
             }
         ]
     }
