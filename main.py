@@ -32,6 +32,10 @@ def get_chart_image(request: ChartRequest):
         "width": 1920,
         "height": 1080,
         "timezone": "Etc/UTC",
+        "range": {  # ✅ Set custom date range
+            "from": "2023-01-20T00:00:00.000Z",
+            "to": "2023-02-12T00:00:00.000Z"
+        },
         "studies": [
             {
                 "name": "Pivot Points Standard",  # ✅ Auto support & resistance zones
@@ -45,6 +49,50 @@ def get_chart_image(request: ChartRequest):
                 "override": {
                     "DONCH.color": "rgb(0,255,255)",  # Cyan for buy/sell zones
                     "DONCH.linewidth": 2
+                }
+            },
+            {
+                "name": "Ichimoku Cloud",  # ✅ Trend & momentum indicator
+                "input": {
+                    "in_0": 9,
+                    "in_1": 26,
+                    "in_2": 52,
+                    "in_3": 26
+                },
+                "override": {
+                    "ConversionLine.visible": True,
+                    "ConversionLine.linewidth": 1,
+                    "ConversionLine.plottype": "line",
+                    "ConversionLine.color": "rgb(33,150,243)",
+                    "BaseLine.visible": True,
+                    "BaseLine.linewidth": 1,
+                    "BaseLine.plottype": "line",
+                    "BaseLine.color": "rgb(128,25,34)",
+                    "LaggingSpan.visible": True,
+                    "LaggingSpan.linewidth": 1,
+                    "LaggingSpan.plottype": "line",
+                    "LaggingSpan.color": "rgb(67,160,71)",
+                    "LeadingSpanA.visible": True,
+                    "LeadingSpanA.linewidth": 1,
+                    "LeadingSpanA.plottype": "line",
+                    "LeadingSpanA.color": "rgb(165,214,167)",
+                    "LeadingSpanB.visible": True,
+                    "LeadingSpanB.linewidth": 1,
+                    "LeadingSpanB.plottype": "line",
+                    "LeadingSpanB.color": "rgb(250,161,164)",
+                    "Plots Background.visible": True,
+                    "Plots Background.transparency": 90
+                }
+            }
+        ],
+        "drawings": [  # ✅ Custom LONG POSITION drawing
+            {
+                "name": "Long Position",
+                "input": {
+                    "startDatetime": "2023-02-09T00:00:00.000Z",
+                    "entryPrice": 22400,
+                    "targetPrice": 24000,
+                    "stopPrice": 22100
                 }
             }
         ],
