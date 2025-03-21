@@ -1,16 +1,17 @@
 import os
-from fastapi import FastAPI
-from pydantic import BaseModel
-from fastapi.responses import JSONResponse
+import base64
+import random
 import requests
 from io import BytesIO
 from PIL import Image
-import random
-import base64
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 app = FastAPI()
 
-CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY")
+# Chart-IMG API Key from environment or fallback for local testing
+CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY", "your_test_api_key_here")
 LAYOUT_ID = "815anN0d"
 LOGO_PATH = "White-Logo-And-Font.png"
 
@@ -39,12 +40,7 @@ def generate_dramatic_zone_analysis(symbol: str, interval: str):
     ]
 
     body = f"{random.choice(zone_lines)}\n\n{random.choice(guidance_lines)}"
-
-    return (
-        f"{symbol} – Timeframe {interval.upper()}\n\n"
-        f"{trend} Outlook {emoji}\n\n"
-        f"{body}"
-    )
+    return f"{symbol} – Timeframe {interval.upper()}\n\n{trend} Outlook {emoji}\n\n{body}"
 
 @app.get("/")
 def read_root():
@@ -73,25 +69,36 @@ def get_chart_image(request: ChartRequest):
             timeout=60
         )
 
+        # Validate response
         if response.status_code != 200 or "image" not in response.headers.get("Content-Type", ""):
-            return {"error": "Chart image failed", "details": response.text}
+            return JSONResponse(status_code=400, content={
+                "error": "Chart image failed",
+                "details": response.text
+            })
 
+        # Process and logo overlay
         chart_image = Image.open(BytesIO(response.content))
         final_image = add_logo_to_chart(chart_image)
+
+        # Convert to base64
         img_io = BytesIO()
         final_image.save(img_io, format="PNG")
         img_io.seek(0)
+        image_base64 = base64.b64encode(img_io.getvalue()).decode("utf-8")
 
+        # Generate text analysis
         analysis_text = generate_dramatic_zone_analysis(request.symbol, request.interval)
 
-        img_base64 = base64.b64encode(img_io.getvalue()).decode("utf-8")
         return JSONResponse(content={
             "caption": analysis_text,
-            "image_base64": img_base64
+            "image_base64": image_base64
         })
 
     except Exception as e:
-        return {"error": "Request crashed", "details": str(e)}
+        return JSONResponse(status_code=500, content={
+            "error": "Request crashed",
+            "details": str(e)
+        })
 
 def add_logo_to_chart(chart_image):
     if not os.path.exists(LOGO_PATH):
@@ -109,7 +116,7 @@ def add_logo_to_chart(chart_image):
     chart_image.paste(logo, (x_position, y_position), logo)
     return chart_image
 
-# Optional test
+# Optional test for terminal
 if __name__ == "__main__":
     result = generate_dramatic_zone_analysis("XAUUSD", "M15")
     print(result)
