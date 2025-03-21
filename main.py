@@ -9,7 +9,7 @@ from io import BytesIO
 app = FastAPI()
 
 CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY")
-LAYOUT_ID = "815anN0d"  # Your shared layout ID
+LAYOUT_ID = "815anN0d"  # Your shared TradingView layout
 
 class ChartRequest(BaseModel):
     symbol: str
@@ -17,7 +17,7 @@ class ChartRequest(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "AI Layout Chart Generator is running ✅"}
+    return {"message": "AI Technical Layout Chart (HD + Zoomed) is running ✅"}
 
 @app.post("/get_chart_image")
 def get_chart_image(request: ChartRequest):
@@ -30,8 +30,13 @@ def get_chart_image(request: ChartRequest):
         "symbol": request.symbol,
         "interval": request.interval,
         "width": 1920,
-        "height": 1080,
-        "format": "png"
+        "height": 1440,
+        "format": "png",
+        "zoomIn": 4,
+        "override": {
+            "showLegend": False,
+            "showStudyLastValue": False
+        }
     }
 
     try:
@@ -39,18 +44,13 @@ def get_chart_image(request: ChartRequest):
             f"https://api.chart-img.com/v2/tradingview/layout-chart/{LAYOUT_ID}",
             headers=headers,
             json=payload,
-            timeout=60  # recommended
+            timeout=60
         )
-
-        print("Status Code:", response.status_code)
-        print("Response Headers:", response.headers)
 
         if response.status_code == 200 and "image" in response.headers["Content-Type"]:
             return StreamingResponse(BytesIO(response.content), media_type="image/png")
         else:
-            print("❌ Non-image response received")
             return JSONResponse(content={"error": "API did not return image", "details": response.text}, status_code=422)
 
     except Exception as e:
-        print("❌ Request Failed:", str(e))
-        return JSONResponse(content={"error": "Request crashed", "details": str(e)}, status_code=500)
+        return JSONResponse(content={"error": "Request failed", "details": str(e)}, status_code=500)
