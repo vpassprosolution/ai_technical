@@ -23,18 +23,19 @@ def read_root():
 def get_chart_image(request: ChartRequest):
     headers = {
         "x-api-key": CHART_IMG_API_KEY,
-        "tradingview-session-id": SESSION_ID,  # Make sure this is correct
-        "tradingview-session-id-sign": SESSION_SIGN,  # Make sure this is correct
+        "tradingview-session-id": SESSION_ID,
+        "tradingview-session-id-sign": SESSION_SIGN,
         "Content-Type": "application/json"
     }
 
     payload = {
         "symbol": request.symbol,
         "interval": request.interval,
-        "width": 1920,  # Higher resolution for Pro
+        "width": 1920,  # Max resolution
         "height": 1600,
-        "layout": "vessa pro",  # Your saved TradingView layout with indicators
-        "loadIndicators": True  # Ensures indicators are loaded with the layout
+        "layout": "vessa pro",  # The layout you saved in TradingView with indicators
+        "loadIndicators": True,  # Ensure indicators are loaded
+        "useIndicatorsFromLayout": True,  # Explicitly state to use layout indicators
     }
 
     try:
@@ -51,6 +52,7 @@ def get_chart_image(request: ChartRequest):
 
     except requests.exceptions.RequestException as e:
         return {"error": "Request failed", "details": str(e)}
+
 
 # ✅ Required for Railway Deployment
 if __name__ == "__main__":
