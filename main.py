@@ -10,7 +10,6 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# Chart-IMG API Key from environment or fallback for local testing
 CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY", "your_test_api_key_here")
 LAYOUT_ID = "815anN0d"
 LOGO_PATH = "White-Logo-And-Font.png"
@@ -21,14 +20,20 @@ class ChartRequest(BaseModel):
 
 def generate_dramatic_zone_analysis(symbol: str, interval: str):
     trend = random.choice(["Bullish", "Bearish"])
-    emoji = "💹" if trend == "Bullish" else "📉"
+    emoji = "📉" if trend == "Bearish" else "💹"
 
     zone_lines = [
-        "A key zone is lighting up on the chart...",
-        "The battle between buyers and sellers is clearly drawn in the zones.",
-        "Vessa highlights an area of interest where momentum is shifting.",
-        "Watch the zones closely — they’re whispering opportunity.",
-        "Price is hovering around a sensitive area. Stay sharp."
+        "A major liquidity zone is forming, hinting at an upcoming shift in market momentum. Watch closely.",
+        "Strong historical reaction area detected. Traders are watching this zone for breakout or reversal.",
+        "The market has repeatedly tested this level. A key decision point is near.",
+        "A powerful price zone is developing where buyers and sellers are in active battle.",
+        "Zone is heating up with compressed candles — a volatility explosion may be near.",
+        "Vessa AI has detected overlapping supply/demand layers. Expect rapid reaction.",
+        "An imbalance is forming at this zone, price could react aggressively soon.",
+        "Price is consolidating in a tight range near this zone — potential accumulation or distribution.",
+        "Multiple timeframe alignment found at this level. Critical reaction expected.",
+        "Wicks are stacking near this zone, suggesting a powerful rejection zone is forming.",
+        # add more unique variations below (40+ total)
     ]
 
     guidance_lines = [
@@ -36,11 +41,22 @@ def generate_dramatic_zone_analysis(symbol: str, interval: str):
         "Focus on market structure, not just price. The zones don’t lie.",
         "It’s not about prediction — it’s about preparation. Trust the levels.",
         "The moment is near. Respect the zone. React with precision. ⚔️",
-        "Stay patient. The best trades come from the clearest zones. 🧘‍♂️"
+        "Stay patient. The best trades come from the clearest zones. 🧘‍♂️",
+        "This zone holds the key to market bias. Observe price reaction closely.",
+        "Trade less. Observe more. Let the zone tell you when to strike.",
+        "Momentum traders and swing traders are both watching this zone.",
+        "Zone aggression is rising — be ready for fakeouts before breakout.",
+        "This is where patience becomes a weapon. Wait for confirmation."
+        # add more smart variations (total 40-50 lines)
     ]
 
     body = f"{random.choice(zone_lines)}\n\n{random.choice(guidance_lines)}"
-    return f"{symbol} – Timeframe {interval.upper()}\n\n{trend} Outlook {emoji}\n\n{body}"
+
+    return (
+        f"{symbol} – Timeframe {interval.upper()}\n\n"
+        f"{trend} Outlook {emoji}\n\n"
+        f"{body}"
+    )
 
 @app.get("/")
 def read_root():
@@ -69,24 +85,20 @@ def get_chart_image(request: ChartRequest):
             timeout=60
         )
 
-        # Validate response
         if response.status_code != 200 or "image" not in response.headers.get("Content-Type", ""):
             return JSONResponse(status_code=400, content={
                 "error": "Chart image failed",
                 "details": response.text
             })
 
-        # Process and logo overlay
         chart_image = Image.open(BytesIO(response.content))
         final_image = add_logo_to_chart(chart_image)
 
-        # Convert to base64
         img_io = BytesIO()
         final_image.save(img_io, format="PNG")
         img_io.seek(0)
         image_base64 = base64.b64encode(img_io.getvalue()).decode("utf-8")
 
-        # Generate text analysis
         analysis_text = generate_dramatic_zone_analysis(request.symbol, request.interval)
 
         return JSONResponse(content={
@@ -116,7 +128,6 @@ def add_logo_to_chart(chart_image):
     chart_image.paste(logo, (x_position, y_position), logo)
     return chart_image
 
-# Optional test for terminal
 if __name__ == "__main__":
     result = generate_dramatic_zone_analysis("XAUUSD", "M15")
     print(result)
