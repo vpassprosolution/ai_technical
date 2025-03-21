@@ -31,8 +31,8 @@ def get_chart_image(request: ChartRequest):
         "width": 1920,  
         "height": 1080,  
         "format": "png",
-        "zoomOut": 3,   # Adjust chart zoom level
-        "shiftLeft": 75,  # Move the chart slightly left
+        "zoomOut": 2,   # Adjust chart zoom level
+        "shiftLeft": 60,  # Move the chart slightly left
         "override": {
             "mainPaneHeight": 800  # Increase main chart area size
         }
@@ -59,20 +59,20 @@ def get_chart_image(request: ChartRequest):
         return {"error": "Request failed", "details": str(e)}
 
 def add_logo_to_chart(chart_image):
-    """ Adds the VessaPro watermark at the bottom-left, overlapping the TradingView logo """
+    """ Adds the VessaPro watermark at the center-bottom of the image with a larger size """
     if not os.path.exists(LOGO_PATH):
         return chart_image  
 
     logo = Image.open(LOGO_PATH).convert("RGBA")
 
-    # Resize logo to be smaller
-    logo_width = chart_image.width // 8  
+    # Resize logo to be larger
+    logo_width = chart_image.width // 4  # Bigger than before
     logo_height = int((logo_width / logo.width) * logo.height)
     logo = logo.resize((logo_width, logo_height), Image.LANCZOS)
 
-    # Position: Bottom-left, overlapping TradingView logo
-    x_position = 20  
-    y_position = chart_image.height - logo_height - 20  
+    # Position: Center-bottom
+    x_position = (chart_image.width - logo_width) // 2  
+    y_position = chart_image.height - logo_height - 40  # Lower position, but still above chart edge
 
     # Paste logo onto chart
     chart_image.paste(logo, (x_position, y_position), logo)
