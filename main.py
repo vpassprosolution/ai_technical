@@ -23,33 +23,18 @@ def read_root():
 def get_chart_image(request: ChartRequest):
     headers = {
         "x-api-key": CHART_IMG_API_KEY,
-        "tradingview-session-id": SESSION_ID,
-        "tradingview-session-id-sign": SESSION_SIGN,
+        "tradingview-session-id": SESSION_ID,  # Make sure this is correct
+        "tradingview-session-id-sign": SESSION_SIGN,  # Make sure this is correct
         "Content-Type": "application/json"
     }
-
-    # Define the chart indicators you want to add (default ones like Moving Averages, RSI)
-    indicators = [
-        {
-            "id": "sma",  # Simple Moving Average
-            "length": 14,  # 14 periods
-            "color": "blue"
-        },
-        {
-            "id": "rsi",  # Relative Strength Index
-            "length": 14,  # 14 periods
-            "color": "green"
-        }
-    ]
 
     payload = {
         "symbol": request.symbol,
         "interval": request.interval,
-        "width": 1920,  # Max resolution
+        "width": 1920,  # Max resolution for Pro
         "height": 1600,
-        "layout": "vessa pro",  # Use your TradingView layout (if desired)
-        "loadIndicators": True,  # Load the default indicators
-        "indicators": indicators  # Add the custom indicators like Moving Averages and RSI
+        "layout": "vessa pro",  # Your saved TradingView layout with indicators
+        "loadIndicators": True  # Ensures indicators are loaded with the layout
     }
 
     try:
@@ -59,10 +44,16 @@ def get_chart_image(request: ChartRequest):
             json=payload
         )
 
+        # Debugging logs: Check if the response is valid
+        print("Response Status Code:", response.status_code)
+        print("Response Body:", response.text)
+
         if response.status_code == 200:
             return StreamingResponse(BytesIO(response.content), media_type="image/png")
         else:
+            print(f"Error Response: {response.text}")
             return {"error": f"API Error: {response.status_code}", "details": response.text}
 
     except requests.exceptions.RequestException as e:
+        print("Request failed:", e)
         return {"error": "Request failed", "details": str(e)}
