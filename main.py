@@ -27,17 +27,17 @@ def get_chart_image(request: ChartRequest):
     }
 
     params = {
-        "symbol": request.symbol,                   # e.g., BINANCE:BTCUSDT or OANDA:XAUUSD
-        "interval": request.interval,               # e.g., 5m, 1h, 1D
-        "studies": ["RSI:14,close", "MA:9,close"],   # Built-in indicators (Relative Strength Index + Moving Average)
-        "theme": "dark",
-        "style": "candle",
-        "width": 1920,
-        "height": 1600,
-        "timezone": "Etc/UTC",
-        "format": "png",
-        "logo": True
-    }
+    "symbol": request.symbol,
+    "interval": request.interval,
+    "studies": ["RSI:14,close", "MA:9,close"],
+    "theme": "dark",
+    "style": "candle",
+    "width": 1920,
+    "height": 1600,
+    "timezone": "Etc/UTC",
+    "format": "png",
+    "logo": "true"  # ✅ must be a string, not a boolean
+}
 
     try:
         response = requests.get(
