@@ -1,13 +1,12 @@
 import os
-from fastapi import FastAPI, Response
-import requests
+from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
+import requests
 from io import BytesIO
 
 app = FastAPI()
 
-# Get API keys from environment variables
 CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY")
 SESSION_ID = os.getenv("SESSION_ID")
 SESSION_SIGN = os.getenv("SESSION_SIGN")
@@ -43,13 +42,11 @@ def get_chart_image(request: ChartRequest):
     )
 
     if response.status_code == 200:
-        # Return the image directly as a streaming response
         return StreamingResponse(BytesIO(response.content), media_type="image/png")
 
     return {"error": f"API Error: {response.status_code}", "details": response.text}
 
-
-# 👇 ADD THIS IF MISSING
+# ✅ IMPORTANT for Railway
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
