@@ -31,7 +31,7 @@ def generate_dramatic_zone_analysis(symbol: str, interval: str):
         "Vessa AI has detected overlapping supply/demand layers. Expect rapid reaction.",
         "An imbalance is forming at this zone, price could react aggressively soon.",
         "Price is consolidating in a tight range near this zone — potential accumulation or distribution.",
-        "Multiple timeframe alignment found at this level. Critical reaction expected.",
+        "Multiple timeframe alignment found at this level. Critcal reaction expected.",
         "Wicks are stacking near this zone, suggesting a powerful rejection zone is forming.",
         # add more unique variations below (40+ total)
     ]
