@@ -9,11 +9,7 @@ from PIL import Image
 app = FastAPI()
 
 CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY")
-
-# Your TradingView Shared Layout ID (Make sure it's correct)
-LAYOUT_ID = "815anN0d"  # ✅ Your TradingView Layout
-
-# Path to your logo
+LAYOUT_ID = "815anN0d"
 LOGO_PATH = "White-Logo-And-Font.png"
 
 class ChartRequest(BaseModel):
@@ -31,10 +27,15 @@ def get_chart_image(request: ChartRequest):
     }
 
     payload = {
-        "symbol": request.symbol,  # ✅ Keep your requested symbol
-        "width": 1920,  # ✅ HD Wide Format
-        "height": 1080, # ✅ Not square, cinematic
-        "format": "png"
+        "symbol": request.symbol,  
+        "width": 1920,  
+        "height": 1080,  
+        "format": "png",
+        "zoomOut": 3,   # Adjust chart zoom level
+        "shiftLeft": 70,  # Move the chart slightly left
+        "override": {
+            "mainPaneHeight": 800  # Increase main chart area size
+        }
     }
 
     try:
@@ -58,20 +59,20 @@ def get_chart_image(request: ChartRequest):
         return {"error": "Request failed", "details": str(e)}
 
 def add_logo_to_chart(chart_image):
-    """ Adds the VessaPro watermark to the bottom-center of the chart """
+    """ Adds the VessaPro watermark at the bottom-left, overlapping the TradingView logo """
     if not os.path.exists(LOGO_PATH):
-        return chart_image  # If logo is missing, return original chart
+        return chart_image  
 
     logo = Image.open(LOGO_PATH).convert("RGBA")
 
-    # Resize logo to fit well (adjust as needed)
-    logo_width = chart_image.width // 5
+    # Resize logo to be smaller
+    logo_width = chart_image.width // 8  
     logo_height = int((logo_width / logo.width) * logo.height)
     logo = logo.resize((logo_width, logo_height), Image.LANCZOS)
 
-    # Position: Bottom-center
-    x_position = (chart_image.width - logo_width) // 2
-    y_position = chart_image.height - logo_height - 20  # 20px padding from bottom
+    # Position: Bottom-left, overlapping TradingView logo
+    x_position = 20  
+    y_position = chart_image.height - logo_height - 20  
 
     # Paste logo onto chart
     chart_image.paste(logo, (x_position, y_position), logo)
