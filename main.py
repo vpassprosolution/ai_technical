@@ -33,9 +33,9 @@ def get_chart_image(request: ChartRequest):
         "interval": request.interval,
         "width": 1920,  # Max resolution
         "height": 1600,
-        "layout": "vessa pro",  # The layout you saved in TradingView with indicators
-        "loadIndicators": True,  # Ensure indicators are loaded
-        "useIndicatorsFromLayout": True,  # Explicitly state to use layout indicators
+        "layout": "vessa pro",  # Ensure this is exactly your TradingView layout name
+        "loadIndicators": True,  # Force Chart-IMG to load indicators from the layout
+        "useIndicatorsFromLayout": True,  # Explicitly load indicators from the TradingView layout
     }
 
     try:
