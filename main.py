@@ -25,8 +25,8 @@ def get_chart_image(request: ChartRequest):
     }
 
     payload = {
-        "symbol": request.symbol,                   
-        "interval": request.interval,               
+        "symbol": request.symbol,
+        "interval": request.interval,
         "theme": "dark",
         "style": "candle",
         "width": 1920,
@@ -35,13 +35,9 @@ def get_chart_image(request: ChartRequest):
             "from": "2023-01-20T00:00:00.000Z",
             "to": "2023-02-12T00:00:00.000Z"
         },
-        "studies": [
-            {"name": "Pivot Points Standard"},
-            {"name": "Bollinger Bands"}
-        ],
         "drawings": [
             {
-                "name": "Rectangle",
+                "name": "Long Position",
                 "input": {
                     "startDatetime": "2023-02-09T00:00:00.000Z",
                     "entryPrice": 22400,
