@@ -74,7 +74,8 @@ def get_chart_image(request: ChartRequest):
         "interval": request.interval,
         "width": 1920,
         "height": 1080,
-        "format": "png"
+        "format": "png",
+        "rightOffset": 30
     }
 
     try:
