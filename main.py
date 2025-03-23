@@ -1,7 +1,7 @@
 import os
 import base64
 import random
-import requests
+import httpx
 from io import BytesIO
 from PIL import Image
 from fastapi import FastAPI
@@ -50,6 +50,7 @@ def generate_dramatic_zone_analysis(symbol: str, interval: str):
         # add more smart variations (total 40-50 lines)
     ]
 
+
     body = f"{random.choice(zone_lines)}\n\n{random.choice(guidance_lines)}"
 
     return (
@@ -59,11 +60,11 @@ def generate_dramatic_zone_analysis(symbol: str, interval: str):
     )
 
 @app.get("/")
-def read_root():
+async def read_root():
     return {"message": "Welcome to the AI Technical Analysis API"}
 
 @app.post("/get_chart_image")
-def get_chart_image(request: ChartRequest):
+async def get_chart_image(request: ChartRequest):
     headers = {
         "x-api-key": CHART_IMG_API_KEY,
         "Content-Type": "application/json"
@@ -79,12 +80,12 @@ def get_chart_image(request: ChartRequest):
     }
 
     try:
-        response = requests.post(
-            f"https://api.chart-img.com/v2/tradingview/layout-chart/{LAYOUT_ID}",
-            headers=headers,
-            json=payload,
-            timeout=60
-        )
+        async with httpx.AsyncClient(timeout=60) as client:
+            response = await client.post(
+                f"https://api.chart-img.com/v2/tradingview/layout-chart/{LAYOUT_ID}",
+                headers=headers,
+                json=payload
+            )
 
         if response.status_code != 200 or "image" not in response.headers.get("Content-Type", ""):
             return JSONResponse(status_code=400, content={
@@ -130,5 +131,5 @@ def add_logo_to_chart(chart_image):
     return chart_image
 
 if __name__ == "__main__":
-    result = generate_dramatic_zone_analysis("XAUUSD", "M15")
-    print(result)
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)
