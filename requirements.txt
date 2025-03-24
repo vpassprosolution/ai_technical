@@ -1,8 +1,9 @@
 fastapi
 uvicorn
 requests
-python-telegram-bot
-pydantic
+httpx
+gunicorn
 pillow
-python-multipart
 pydantic
+python-multipart
+python-telegram-bot
