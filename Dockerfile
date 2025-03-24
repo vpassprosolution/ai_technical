@@ -16,4 +16,4 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . .
 
 # 🚀 Start the server with Gunicorn + Uvicorn worker
-CMD ["gunicorn", "main:app", "--workers=4", "--threads=4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8080"]
+CMD ["gunicorn", "main:app", "--workers=8", "--threads=4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8080"]
