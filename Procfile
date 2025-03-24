@@ -1,1 +1,0 @@
-web: gunicorn main:app --workers=4 --threads=4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8080
