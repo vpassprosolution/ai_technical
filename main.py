@@ -7,8 +7,19 @@ from PIL import Image
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+import redis 
+import time
+
+
+# ✅ REDIS CONNECTION
+redis_client = redis.StrictRedis.from_url(
+    "redis://default:SVvGFFWHscRbAxcSPswMmyhzXLfhIDyk@yamanote.proxy.rlwy.net:12288",
+    decode_responses=True
+)
+
 
 app = FastAPI()
+
 
 CHART_IMG_API_KEY = os.getenv("CHART_IMG_API_KEY", "your_test_api_key_here")
 LAYOUT_ID = "815anN0d"
@@ -79,6 +90,19 @@ async def get_chart_image(request: ChartRequest):
         "rightOffset": 10
     }
 
+    # ✅ Check Redis Cache
+    cache_key = f"chart_cache:{request.symbol}:{request.interval}"
+    cached_data = redis_client.hgetall(cache_key)
+    
+    if cached_data:
+        timestamp = float(cached_data.get("timestamp", 0))
+        if time.time() - timestamp < 60:
+            print("♻️ Returning chart from Redis cache")
+            return JSONResponse(content={
+                "caption": cached_data.get("caption", ""),
+                "image_base64": cached_data.get("image_base64", "")
+            })
+
     try:
         async with httpx.AsyncClient(timeout=60) as client:
             response = await client.post(
@@ -103,6 +127,14 @@ async def get_chart_image(request: ChartRequest):
 
         analysis_text = generate_dramatic_zone_analysis(request.symbol, request.interval)
 
+        # ✅ Save result to Redis
+        redis_client.hset(cache_key, mapping={
+            "timestamp": time.time(),
+            "caption": analysis_text,
+            "image_base64": image_base64
+        })
+        redis_client.expire(cache_key, 120)  # Optional TTL
+
         return JSONResponse(content={
             "caption": analysis_text,
             "image_base64": image_base64
@@ -113,6 +145,7 @@ async def get_chart_image(request: ChartRequest):
             "error": "Request crashed",
             "details": str(e)
         })
+
 
 def add_logo_to_chart(chart_image):
     if not os.path.exists(LOGO_PATH):
