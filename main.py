@@ -36,7 +36,7 @@ def generate_dramatic_zone_analysis(symbol: str, interval: str):
     zone_lines = [
         "A major liquidity zone is forming, hinting at an upcoming shift in market momentum. Watch closely.",
         "Strong historical reaction area detected. Traders are watching this zone for breakout or reversal.",
-        "The market has repeatedly tested this level. A key decision point is near.",
+        "The market has this level. A key decision point is near.",
         "A powerful price zone is developing where buyers and sellers are in active battle.",
         "Zone is heating up with compressed candles — a volatility explosion may be near.",
         "Vessa AI has detected overlapping supply/demand layers. Expect rapid reaction.",
